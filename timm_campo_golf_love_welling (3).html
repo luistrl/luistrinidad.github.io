@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIMM — Campo de Golf Love y Welling · Punta Bergantín</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+:root{
+  --gold:#C49A2A;--gold2:#E8A820;--gold3:#F0C040;
+  --orange:#D4681A;--orange2:#E8832A;--orange3:#F5A050;
+  --amber:#B87818;--amber2:#CC9020;
+  --bg:#0e0e0e;--bg-card:#161616;--bg-card2:#1c1c1c;
+  --border:rgba(255,255,255,0.08);
+  --text:#f0ede6;--muted:#8a8680;--dim:#444;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:1.5rem 1.25rem;}
+
+/* ── HEADER ── */
+.header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:1.75rem;padding-bottom:1.25rem;border-bottom:.5px solid var(--border);}
+.logo-img{height:42px;width:auto;display:block;margin-bottom:10px;}
+.header-report{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.2px;line-height:1.2;margin-bottom:6px;}
+.header-meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:2px;}
+.header-meta span{font-size:14px;color:var(--muted);}
+.header-meta strong{color:var(--gold);font-weight:600;}
+.header-date{font-size:13px;color:var(--dim);}
+.tag{display:inline-flex;align-items:center;background:#2a1a00;color:var(--gold2);font-size:12px;font-weight:600;padding:7px 16px;border-radius:99px;letter-spacing:.4px;border:.5px solid rgba(196,154,42,0.3);white-space:nowrap;align-self:flex-start;margin-top:4px;}
+
+/* ── KPIs ── */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
+.kpi{background:var(--bg-card);border:.5px solid var(--border);border-radius:10px;padding:18px 16px;}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;margin-bottom:8px;font-weight:600;}
+.kpi-value{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--text);line-height:1;}
+.kpi-value.gold{color:var(--gold);}
+.kpi-sub{font-size:12px;color:var(--dim);margin-top:5px;}
+
+/* ── CHARTS ── */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:1.5rem;}
+.card{background:var(--bg-card);border:.5px solid var(--border);border-radius:12px;padding:16px 18px;}
+.card-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;margin-bottom:12px;font-weight:600;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.bar-label{font-size:12px;color:var(--text);min-width:115px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
+.bar-track{flex:1;height:12px;background:var(--bg-card2);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;}
+.bar-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);min-width:80px;white-space:nowrap;}
+.legend{display:flex;gap:12px;margin-bottom:8px;font-size:12px;color:var(--muted);flex-wrap:wrap;}
+.legend span{display:flex;align-items:center;gap:6px;}
+.ldot{width:11px;height:11px;border-radius:2px;flex-shrink:0;}
+
+/* ── SECTION TITLE ── */
+.section-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;font-weight:600;margin-bottom:12px;}
+.section-count{color:var(--dim);font-weight:400;}
+
+/* ── IMPRESOS GRID ── */
+.impresos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:1.75rem;}
+.impreso-card{background:var(--bg-card);border:.5px solid rgba(196,154,42,0.25);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s;}
+.impreso-card:hover{border-color:rgba(196,154,42,0.6);transform:translateY(-2px);}
+.impreso-img-wrap{width:100%;background:#111;overflow:hidden;position:relative;}
+.impreso-img-wrap img{width:100%;height:100%;object-fit:contain;object-position:top;display:block;transition:transform .3s ease;}
+.impreso-card:hover .impreso-img-wrap img{transform:scale(1.02);}
+.img-placeholder{width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:13px;flex-direction:column;gap:8px;}
+.zoom-hint{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.7);color:var(--gold2);font-size:11px;padding:4px 10px;border-radius:6px;backdrop-filter:blur(4px);opacity:0;transition:opacity .2s;}
+.impreso-card:hover .zoom-hint{opacity:1;}
+.impreso-body{padding:13px 15px;}
+.impreso-medio{font-size:12px;font-weight:700;color:var(--gold2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;}
+.impreso-titular{font-size:13px;color:var(--text);line-height:1.45;margin-bottom:9px;}
+.impreso-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;}
+.impreso-pub{font-family:'DM Mono',monospace;font-size:15px;color:var(--gold);font-weight:500;}
+.impreso-date{font-size:11px;color:var(--dim);}
+
+/* ── LIGHTBOX ── */
+.lightbox{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.95);align-items:center;justify-content:center;padding:1rem;}
+.lightbox.open{display:flex;}
+.lb-inner{position:relative;max-width:min(680px,96vw);width:100%;animation:lbIn .2s ease;}
+@keyframes lbIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.lb-img{width:100%;height:auto;max-height:84vh;object-fit:contain;border-radius:8px;display:block;}
+.lb-info{margin-top:12px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;}
+.lb-medio{font-size:13px;font-weight:700;color:var(--gold2);text-transform:uppercase;letter-spacing:.5px;}
+.lb-titular{font-size:12px;color:var(--muted);flex:1;min-width:0;margin:0 10px;}
+.lb-pub{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);white-space:nowrap;}
+.lb-close{position:absolute;top:-16px;right:-16px;width:36px;height:36px;border-radius:50%;background:var(--bg-card);border:.5px solid var(--border);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s;line-height:1;}
+.lb-close:hover{color:var(--text);border-color:var(--gold);}
+.lb-nav{position:absolute;top:42%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.65);border:.5px solid var(--border);color:var(--muted);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s;}
+.lb-nav:hover{color:var(--text);border-color:var(--gold);}
+.lb-prev{left:-56px;}
+.lb-next{right:-56px;}
+.lb-counter{text-align:center;font-size:11px;color:var(--dim);margin-top:6px;}
+
+/* ── TABLE ── */
+.table-card{background:var(--bg-card);border:.5px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:1.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px;}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;text-align:left;padding:7px 10px;border-bottom:.5px solid var(--border);font-weight:600;}
+td{padding:9px 10px;color:var(--text);border-bottom:.5px solid rgba(255,255,255,0.04);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.link-btn{font-size:12px;color:var(--gold2);text-decoration:none;white-space:nowrap;}
+.link-btn:hover{color:var(--gold3);}
+.pub-val{text-align:right;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);white-space:nowrap;}
+.muted-td{color:var(--muted);font-size:12px;}
+.truncate{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.total-row{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:9px 10px 0;font-size:13px;color:var(--muted);border-top:.5px solid var(--border);margin-top:4px;}
+.total-row strong{font-family:'DM Mono',monospace;color:var(--gold);font-size:14px;}
+
+/* ── RESPONSIVE MÓVIL ── */
+@media(max-width:700px){
+  body{padding:1.1rem 1rem;}
+  .header-report{font-size:18px;}
+  .header-meta span{font-size:13px;}
+  .tag{font-size:11px;padding:6px 13px;}
+  .kpis{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .kpis .kpi:last-child{display:none;}
+  .kpi{padding:14px 13px;}
+  .kpi-label{font-size:10px;}
+  .kpi-value{font-size:22px;}
+  .kpi-sub{font-size:11px;}
+  .charts-row{grid-template-columns:1fr;}
+  .bar-label{min-width:85px;font-size:11px;}
+  .bar-val{min-width:70px;font-size:10px;}
+  .impresos-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .impreso-body{padding:9px 11px;}
+  .impreso-medio{font-size:10px;}
+  .impreso-titular{font-size:11px;margin-bottom:6px;}
+  .impreso-pub{font-size:13px;}
+  .lb-prev{left:-6px;}
+  .lb-next{right:-6px;}
+  .lb-nav{width:32px;height:32px;font-size:15px;}
+  .lb-inner{max-width:100vw;}
+  .lb-close{top:-12px;right:-12px;}
+  .lb-info{flex-direction:column;gap:4px;}
+  .lb-titular{margin:0;}
+}
+@media(max-width:420px){
+  body{padding:.9rem .8rem;}
+  .header-report{font-size:16px;}
+  .kpi-value{font-size:19px;}
+  .impresos-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <img class="logo-img" src="data:image/jpeg;base64,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" alt="TIMM">
+    <div class="header-report">Informe de Monetización en Medios</div>
+    <div class="header-meta">
+      <span>Cliente: <strong>Punta Bergantín</strong></span>
+      <span>Tema: <strong>Campo de Golf Love y Welling</strong></span>
+      <span class="header-date">29 enero 2026</span>
+    </div>
+  </div>
+  <span class="tag">Campo de Golf Love y Welling</span>
+</div>
+
+<!-- KPIs -->
+<div class="kpis">
+  <div class="kpi"><div class="kpi-label">Total Publicity</div><div class="kpi-value gold">RD$1,070,833</div><div class="kpi-sub">Valor total en medios</div></div>
+  <div class="kpi"><div class="kpi-label">Publicaciones</div><div class="kpi-value">39</div><div class="kpi-sub">Notas publicadas</div></div>
+  <div class="kpi"><div class="kpi-label">Medios alcanzados</div><div class="kpi-value">37</div><div class="kpi-sub">Medios distintos</div></div>
+  <div class="kpi"><div class="kpi-label">Publicity Digital</div><div class="kpi-value">RD$855,000</div><div class="kpi-sub">35 notas · 79.8%</div></div>
+  <div class="kpi"><div class="kpi-label">Publicity Impreso</div><div class="kpi-value">RD$215,833</div><div class="kpi-sub">4 notas · 20.2%</div></div>
+  <div class="kpi"><div class="kpi-label">Cliente</div><div class="kpi-value" style="font-size:16px;padding-top:3px;">Punta Bergantín</div><div class="kpi-sub">Único cliente</div></div>
+</div>
+
+<!-- CHARTS -->
+<div class="charts-row">
+  <div class="card">
+    <div class="card-title">Monetización por medio (top 10)</div>
+    <div id="barras"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Distribución por formato</div>
+    <div class="legend" id="legend-donut"></div>
+    <div style="position:relative;width:100%;height:185px;"><canvas id="cTipo"></canvas></div>
+  </div>
+</div>
+
+<!-- IMPRESOS PRIMERO -->
+<div class="section-title">Publicaciones Impresas &nbsp;<span class="section-count">4 notas · RD$215,833</span></div>
+<div class="impresos-grid" id="impresos-grid"></div>
+
+<!-- DIGITALES -->
+<div class="section-title">Publicaciones Digitales &nbsp;<span class="section-count">35 notas · RD$855,000</span></div>
+<div class="table-card">
+  <table>
+    <thead><tr><th>#</th><th>Medio</th><th>Titular</th><th style="text-align:right">Publicity</th><th>Enlace</th></tr></thead>
+    <tbody id="tbody-digital"></tbody>
+  </table>
+  <div class="total-row">Total digital &nbsp;<strong>RD$855,000</strong></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLB(event)">
+  <div class="lb-inner">
+    <button class="lb-close" onclick="closeLB()">✕</button>
+    <button class="lb-nav lb-prev" onclick="navLB(-1,event)">‹</button>
+    <button class="lb-nav lb-next" onclick="navLB(1,event)">›</button>
+    <img class="lb-img" id="lb-img" src="" alt="">
+    <div class="lb-info">
+      <span class="lb-medio" id="lb-medio"></span>
+      <span class="lb-titular" id="lb-titular"></span>
+      <span class="lb-pub" id="lb-pub"></span>
+    </div>
+    <div class="lb-counter" id="lb-counter"></div>
+  </div>
+</div>
+
+<script>
+const COLORS=['#C49A2A','#E8A820','#D4681A','#F0C040','#B87818','#E8832A','#F5A050','#CC9020','#A05010','#D4901A'];
+
+const digital=[
+  {n:1,medio:"Remolacha",pub:90000,titular:"Punta Bergantín Golf",enlace:"https://remolacha.net/2026/01/punta-bergantin-golf/"},
+  {n:2,medio:"De Último Minuto",pub:80000,titular:"Punta Bergantín presenta",enlace:"https://deultimominuto.net/uncategorized/punta-bergantin-presenta/"},
+  {n:3,medio:"Roberto Cavada",pub:65000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://robertocavada.com/deportes/2026/01/28/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:4,medio:"CDN",pub:65000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://cdn.com.do/nacionales/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:5,medio:"elDinero",pub:60000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://eldinero.com.do/352078/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:6,medio:"El Nuevo Diario",pub:50000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://elnuevodiario.com.do/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:7,medio:"Hoy",pub:25000,titular:"Punta Bergantín presenta visión campo golf Davis Love III Beau Welling",enlace:"https://hoy.com.do/deportes/punta-bergantin-presenta-vision-campo-golf-davis-love-iii-beau-welling_1074425.html"},
+  {n:8,medio:"Bávaro Digital",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://bavarodigital.net/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:9,medio:"Arecoa",pub:15000,titular:"Punta Bergantín presenta visión conceptual del campo de golf",enlace:"https://www.arecoa.com/destinos/2026/01/29/punta-bergantin-presenta-vision-conceptual-del-campo-de-golf/"},
+  {n:10,medio:"Diario Social RD",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://diariosocialrd.com/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:11,medio:"FV Digital",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://fvdigital.do/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:12,medio:"El Pregonero",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://elpregonerord.com/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:13,medio:"Informador RD",pub:15000,titular:"Punta Bergantín revela su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://informadord.com/punta-bergantin-revela-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:14,medio:"Tele Radio América",pub:15000,titular:"Punta Bergantín expone su perspectiva del campo de golf en compañía de Davis Love III y Beau Welling",enlace:"https://teleradioamerica.com/2026/01/punta-bergantin-expone-su-perspectiva-del-campo-de-golf-en-compania-de-davis-love-iii-y-beau-welling/"},
+  {n:15,medio:"Noticias al Tiempo",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://noticiasaltiempo.com/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:16,medio:"Quiosco",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://quiosco.com.do/2026/01/28/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:17,medio:"Momento Deportivo RD",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf",enlace:"https://momentodeportivord.com/punta-bergantin-presenta-su-vision-del-campo-de-golf/"},
+  {n:18,medio:"Telenoticias",pub:15000,titular:"Punta Bergantín revela ambicioso campo de golf junto a Davis Love III y Beau Welling",enlace:"https://telenoticias.com.do/punta-bergantin-revela-ambicioso-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:19,medio:"Atardecer",pub:15000,titular:"Punta Bergantín presenta visión de su campo de golf",enlace:"https://atardecer.com.do/punta-bergantin-presenta-vision-de-su-campo-de-golf/"},
+  {n:20,medio:"Compendio Noticioso",pub:15000,titular:"Punta Bergantín presenta su visión del...",enlace:"https://www.compendionoticioso.com/2026/01/punta-bergantin-presenta-su-vision-del.html"},
+  {n:21,medio:"Testigo",pub:15000,titular:"Punta Bergantín apuesta al golf de clase mundial",enlace:"https://testigo.com.do/punta-bergantin-apuesta-al-golf-de-clase-mundial/"},
+  {n:22,medio:"CDN Deportes",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf",enlace:"https://cdndeportes.com.do/punta-bergantin-presenta-su-vision-del-campo-de-golf/"},
+  {n:23,medio:"Fiebre de Golf",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://www.fiebredegolf.com/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:24,medio:"La Jevi FM",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://lajevifm.com/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:25,medio:"Turismo y Atracciones",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://turismoyatracciones.com/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:26,medio:"El Sol de las Américas",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://elsoldelasamericas.com.do/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:27,medio:"Santiago Digital",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf",enlace:"https://santiagodigital.net/punta-bergantin-presenta-su-vision-del-campo-de-golf/"},
+  {n:28,medio:"Manolito en el Play",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://manolitoenelplay.com/2026/01/28/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:29,medio:"RB Noticias y Más",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://www.rbnoticiasymas.com/deportes/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:30,medio:"Todo Sobre Not Dom",pub:15000,titular:"Pendiente",enlace:"https://todosobrenotdom.blogspot.com/"},
+  {n:31,medio:"Mira TV HD",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://miratvhd.com/2026/01/29/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:32,medio:"Cana TV Digital",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://canatvdigital.com/2026/01/29/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:33,medio:"Dominicana Gourmet",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://dominicanagourmet.com/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:34,medio:"Recorriendo con Salvador",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://recorriendoconsalvador.com/2026/01/30/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"},
+  {n:35,medio:"Resumen Turismo",pub:15000,titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",enlace:"https://resumenturismo.com/punta-bergantin-presenta-su-vision-del-campo-de-golf-junto-a-davis-love-iii-y-beau-welling/"}
+];
+
+const impresos=[
+  {medio:"Hoy",pub:64155,fecha:"29 enero 2026",titular:"Resaltan rol campo golf en Punta Bergantín",img:"https://hmhevdmmlgsltzidbrpf.supabase.co/storage/v1/object/public/Impresos%20Clip%20TIMM/Campo%20de%20Golf%20Love%20y%20Welling/WhatsApp%20Image%202026-03-11%20at%203.39.32%20PM.jpeg"},
+  {medio:"El Día",pub:59377.50,fecha:"29 enero 2026",titular:"Punta Bergantín presenta su visión del campo de golf",img:"https://hmhevdmmlgsltzidbrpf.supabase.co/storage/v1/object/public/Impresos%20Clip%20TIMM/Campo%20de%20Golf%20Love%20y%20Welling/WhatsApp%20Image%202026-03-11%20at%203.39.32%20PM%20(1).jpeg"},
+  {medio:"La Información",pub:46800,fecha:"29 enero 2026",titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",img:"https://hmhevdmmlgsltzidbrpf.supabase.co/storage/v1/object/public/Impresos%20Clip%20TIMM/Campo%20de%20Golf%20Love%20y%20Welling/WhatsApp%20Image%202026-03-11%20at%203.39.33%20PM.jpeg"},
+  {medio:"El Nuevo Diario",pub:45500,fecha:"29 enero 2026",titular:"Punta Bergantín presenta su visión del campo de golf junto a Davis Love III y Beau Welling",img:"https://hmhevdmmlgsltzidbrpf.supabase.co/storage/v1/object/public/Impresos%20Clip%20TIMM/Campo%20de%20Golf%20Love%20y%20Welling/WhatsApp%20Image%202026-03-11%20at%203.39.31%20PM.jpeg"}
+];
+
+const fmt=n=>'RD$'+Math.round(n).toLocaleString('es-DO');
+
+// Barras top 10
+const byMedio={};
+[...digital,...impresos].forEach(r=>{byMedio[r.medio]=(byMedio[r.medio]||0)+r.pub;});
+const sorted=Object.entries(byMedio).sort((a,b)=>b[1]-a[1]).slice(0,10);
+const maxV=sorted[0][1];
+document.getElementById('barras').innerHTML=sorted.map(([m,v],i)=>
+  '<div class="bar-row"><div class="bar-label" title="'+m+'">'+m+'</div><div class="bar-track"><div class="bar-fill" style="width:'+(v/maxV*100).toFixed(1)+'%;background:'+COLORS[i%COLORS.length]+'"></div></div><div class="bar-val">'+fmt(v)+'</div></div>'
+).join('');
+
+// Donut
+const dc=['#E8A820','#D4681A'];
+document.getElementById('legend-donut').innerHTML=['Digital','Impreso'].map((l,i)=>
+  '<span><span class="ldot" style="background:'+dc[i]+'"></span>'+l+' — '+fmt([855000,215832.5][i])+'</span>'
+).join('');
+new Chart(document.getElementById('cTipo'),{
+  type:'doughnut',
+  data:{labels:['Digital','Impreso'],datasets:[{data:[855000,215832.5],backgroundColor:dc,borderWidth:0,hoverOffset:4}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}}}
+});
+
+// Impresos cards — imagen completa 3:4
+document.getElementById('impresos-grid').innerHTML=impresos.map((r,i)=>
+  '<div class="impreso-card" onclick="openLB('+i+')">'+
+    '<div class="impreso-img-wrap" style="aspect-ratio:3/4;">'+
+      '<img src="'+r.img+'" alt="'+r.medio+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">'+
+      '<div class="img-placeholder" style="display:none;">Sin imagen</div>'+
+      '<div class="zoom-hint">🔍 Ver completa</div>'+
+    '</div>'+
+    '<div class="impreso-body">'+
+      '<div class="impreso-medio">'+r.medio+'</div>'+
+      '<div class="impreso-titular">'+r.titular+'</div>'+
+      '<div class="impreso-footer"><span class="impreso-pub">'+fmt(r.pub)+'</span><span class="impreso-date">Impreso · '+r.fecha+'</span></div>'+
+    '</div>'+
+  '</div>'
+).join('');
+
+// Tabla digital
+document.getElementById('tbody-digital').innerHTML=digital.map(r=>
+  '<tr><td class="muted-td">'+r.n+'</td><td style="font-weight:600;white-space:nowrap">'+r.medio+'</td><td class="truncate muted-td" title="'+r.titular+'">'+r.titular+'</td><td class="pub-val">'+fmt(r.pub)+'</td><td><a class="link-btn" href="'+r.enlace+'" target="_blank">Ver ↗</a></td></tr>'
+).join('');
+
+// Lightbox
+let lbIdx=0;
+function openLB(i){
+  lbIdx=i; updateLB();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function updateLB(){
+  const r=impresos[lbIdx];
+  document.getElementById('lb-img').src=r.img;
+  document.getElementById('lb-medio').textContent=r.medio;
+  document.getElementById('lb-titular').textContent=r.titular;
+  document.getElementById('lb-pub').textContent=fmt(r.pub);
+  document.getElementById('lb-counter').textContent=(lbIdx+1)+' / '+impresos.length;
+}
+function closeLB(e){
+  if(e&&e.target!==document.getElementById('lightbox')&&!e.target.classList.contains('lb-close'))return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow='';
+}
+function navLB(dir,e){
+  if(e)e.stopPropagation();
+  lbIdx=(lbIdx+dir+impresos.length)%impresos.length;
+  updateLB();
+}
+// Touch swipe en lightbox
+let tsX=0;
+document.getElementById('lightbox').addEventListener('touchstart',e=>tsX=e.touches[0].clientX,{passive:true});
+document.getElementById('lightbox').addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tsX;
+  if(Math.abs(dx)>50)navLB(dx<0?1:-1);
+},{passive:true});
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('lightbox').classList.contains('open'))return;
+  if(e.key==='Escape')closeLB({target:document.getElementById('lightbox')});
+  if(e.key==='ArrowRight')navLB(1);
+  if(e.key==='ArrowLeft')navLB(-1);
+});
+</script>
+</body>
+</html>
